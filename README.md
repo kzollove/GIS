@@ -61,7 +61,7 @@ If you already have a Postgres/PostGIS database, skip the Docker section.
 ```
 connectionDetails <- DatabaseConnector::createConnectionDetails(
   dbms = "postgresql",
-  server = "", # name of the server
+  server = "", # server info, use localhost/gaiaDB if setting up from Docker
   port = 5432,
   user="postgres", # username to access server
   password = "mysecretpassword") 
