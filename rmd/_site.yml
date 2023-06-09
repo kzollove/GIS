@@ -35,6 +35,8 @@ navbar:
               href: "geocodingFull.html"
             - text: "Geocoding a Cohort"
               href: "geocodingCohort.html"
+        - text: "Use Cases"
+          href: "usecases.html"
     - text: "Adding Data Sources"
       icon: fa-plus-square
       menu:

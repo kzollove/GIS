@@ -1,0 +1,53 @@
+---
+title: '<div><img src="ohdsi40x40.png"></img> OHDSI GIS WG Use Cases</div>'
+output:
+   html_document:
+        toc: TRUE
+        toc_depth: 3
+        toc_float:
+          collapsed: false
+---
+
+# Overview
+
+Demonstrations of healthcare related use cases for the gaiaDB
+
+## Prerequisites
+
+In order to enable these use cases, your instance of gaiaDB must contain geocoded patient information. For instructions on supported OMOP/OHDSI geocoding workflows, see [Geocoding the Location Table](https://ohdsi.github.io/GIS/geocodingFull.html) or [Geocoding a Cohort](https://ohdsi.github.io/GIS/geocodingCohort.html).
+
+## Connect to gaiaDB server:
+If you don't already have a gaiaDB server set up, see the [installation instructions](https://ohdsi.github.io/GIS/installation.html#gaiaDB_database) before proceeding.
+```{r tidy=FALSE,eval=FALSE}
+library(DatabaseConnector)
+gaiaConnectionDetails <- DatabaseConnector::createConnectionDetails(
+  dbms = "postgresql",
+  server = "localhost/gaiaDB",
+  port = 5432,
+  user="postgres",
+  password = "mySecretPassword") 
+```
+
+## Use Cases
+
+### Get all patients within a particular county
+
+We want to get all patients within Suffolk County, MA. The Census GEOID for Massachusetts is 25025. We can extract the location_ids for all of our OMOP patients in Suffolk County:
+
+```{r tidy=FALSE, eval=FALSE}
+sql <- "SELECT l.location_id, public.ST_asText(l.geometry) AS geometry
+          FROM omop.geom_omop_location l 
+          JOIN census_tiger_line.geom_us_county_2020 g ON public.ST_Within(l.geometry, g.geom_wgs84)
+          WHERE g.geom_source_value = '25025'"
+
+conn <- DatabaseConnector::connect(gaiaConnectionDetails)
+res <- DatabaseConnector::querySql(conn, sql = sql)
+DatabaseConnector::disconnect(conn)
+
+res <- sf::st_as_sf(head(res), wkt="GEOMETRY")
+res <- sf::st_set_crs(res, 4326)
+```
+
+
+
+
