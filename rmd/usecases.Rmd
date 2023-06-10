@@ -47,7 +47,28 @@ DatabaseConnector::disconnect(conn)
 res <- sf::st_as_sf(head(res), wkt="GEOMETRY")
 res <- sf::st_set_crs(res, 4326)
 ```
+### Get all patients within a county with unemployment estimate greater than 50000
 
+We want to get all patients from counties with an estimated 50000 or more unemployed persons. We choose the SVI variable for unemployed civilians estimate.
+
+
+```{r tidy=FALSE, eval=FALSE}
+sql <- " select l.location_id, public.ST_asText(l.geometry) AS geometry
+          FROM omop.geom_omop_location l 
+          JOIN census_tiger_line.geom_us_county_2018 g
+          ON public.ST_Within(l.geometry, g.geom_wgs84)
+          join cdc_atsdr_svi.attr_us_county_2018 svi
+          on svi.geom_record_id = g.geom_record_id
+          and svi.variable_source_record_id = 141
+          WHERE svi.value_as_number > 50000"
+
+conn <- DatabaseConnector::connect(gaiaConnectionDetails)
+res <- DatabaseConnector::querySql(conn, sql = sql)
+DatabaseConnector::disconnect(conn)
+
+res <- sf::st_as_sf(head(res), wkt="GEOMETRY")
+res <- sf::st_set_crs(res, 4326)
+```
 
 
 
